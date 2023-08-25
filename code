@@ -1,0 +1,89 @@
+
+import requests
+
+import json
+
+from notion.client import NotionClient
+
+def gerar_texto_rytr(texto_amostra, linguagem, tom, criatividade, gerador_conteudo):
+
+# Defina as credenciais de acesso
+
+api_key = '-Y4_ADJV1WNCXRNMS4XAP'
+
+secret_key = 'secret_jQZw3ARraFvTgEKgbDE715PXptPTHI1JXUsUdIr2aFt'
+
+# Defina a URL de base da API do Rytr
+
+url_base = '<https://api.rytr.me/v1/assistants>'
+
+# Defina as opções desejadas
+
+payload = {'language': linguagem,
+
+'tone': tom,
+
+'creativity': criatividade,
+
+'content_generator': gerador_conteudo,
+
+'text': texto_amostra}
+
+# Faça a chamada à API do Rytr
+
+headers = {'Authorization': f'Bearer {api_key}:{secret_key}',
+
+'Content-Type': 'application/json'}
+
+response = requests.post(url_base, headers=headers, data=json.dumps(payload))
+
+# Obtenha o texto gerado pela resposta da API
+
+texto_gerado = response.json()['data']['text']
+
+return texto_gerado
+
+# Crie uma conexão com o Notion usando o token de integração
+
+client = NotionClient(token_v2="seu_token_de_integracao")
+
+# Defina a URL da página onde deseja adicionar as caixas de seleção e o campo de entrada de texto
+
+url_pagina = "<https://www.notion.so/odiretorcriativo/Rytr-c2b35226758b4fa29c5414fbe96163d1?pvs=4>"
+
+# Obtenha a página do Notion usando a URL
+
+pagina = client.get_block(url_pagina)
+
+# Adicione as propriedades de caixa de seleção para nível de criatividade, linguagem e tom
+
+pagina.children.add_new("CheckboxPropertyBlock", title="Nível de Criatividade")
+
+pagina.children.add_new("CheckboxPropertyBlock", title="Linguagem")
+
+pagina.children.add_new("CheckboxPropertyBlock", title="Tom")
+
+# Adicione o campo de entrada de texto na página inteira
+
+pagina.children.add_new("TextBlock", title="Texto de Amostra")
+
+# Agora você pode prosseguir com a integração da API do Rytr usando as opções selecionadas pelo usuário
+
+# Exemplo de como obter o valor das caixas de seleção e o texto de amostra
+
+nivel_criatividade = pagina.children[0].checkbox
+
+linguagem = pagina.children[1].checkbox
+
+tom = pagina.children[2].checkbox
+
+texto_amostra = pagina.children[3].title
+
+# Faça a chamada à API do Rytr com as opções selecionadas e o texto de amostra
+
+texto_gerado = gerar_texto_rytr(texto_amostra, linguagem, tom, nivel_criatividade, gerador_conteudo)
+
+# Atualize a página do Notion com o texto gerado
+
+pagina.children.add_new("TextBlock", title=texto_gerado)
+
